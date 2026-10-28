@@ -1,0 +1,515 @@
+import express from "express";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+
+import {
+    uploadUser
+} from "../middlewares/multer.middleware.js";
+
+import {
+    hashPassword
+} from "../utils/crypto.js";
+
+
+const __filename =
+    fileURLToPath(import.meta.url);
+
+const __dirname =
+    path.dirname(__filename);
+
+const router = express.Router();
+
+const usersFile = path.join(
+    __dirname,
+    "../data/users.json"
+);
+
+
+// =======================================
+// FUNCIONES AUXILIARES
+// =======================================
+
+async function readUsers() {
+    const data = await fs.readFile(
+        usersFile,
+        "utf8"
+    );
+
+    if (!data.trim()) {
+        return [];
+    }
+
+    return JSON.parse(data);
+}
+
+
+async function writeUsers(users) {
+    await fs.writeFile(
+        usersFile,
+        JSON.stringify(users, null, 2),
+        "utf8"
+    );
+}
+
+
+function hidePassword(user) {
+    const {
+        password,
+        ...safeUser
+    } = user;
+
+    return safeUser;
+}
+
+
+function getPublicFilePath(fileUrl) {
+    return path.join(
+        __dirname,
+        "../../public",
+        fileUrl.replace(/^\/+/, "")
+    );
+}
+
+
+async function deleteFileSafe(fileUrl) {
+    if (!fileUrl) return;
+
+    try {
+        await fs.unlink(
+            getPublicFilePath(fileUrl)
+        );
+    } catch (error) {
+        console.log(
+            `No se pudo eliminar: ${fileUrl}`
+        );
+    }
+}
+
+
+async function deleteUploadedFile(file) {
+    if (!file) return;
+
+    try {
+        await fs.unlink(file.path);
+    } catch (error) {
+        console.log(
+            "No se pudo eliminar el archivo temporal"
+        );
+    }
+}
+
+
+// =======================================
+// GET /api/users
+// =======================================
+
+router.get("/", async (req, res) => {
+    try {
+        const users =
+            await readUsers();
+
+        const safeUsers =
+            users.map(hidePassword);
+
+        res.status(200).json(
+            safeUsers
+        );
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error:
+                "Error al leer los usuarios"
+        });
+    }
+});
+
+
+// =======================================
+// GET /api/users/:id
+// =======================================
+
+router.get("/:id", async (req, res) => {
+    try {
+        const id =
+            Number(req.params.id);
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
+            return res.status(400).json({
+                error: "ID inválido"
+            });
+        }
+
+        const users =
+            await readUsers();
+
+        const user = users.find(
+            user => user.id === id
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                error:
+                    "Usuario no encontrado"
+            });
+        }
+
+        res.status(200).json(
+            hidePassword(user)
+        );
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error:
+                "Error al consultar el usuario"
+        });
+    }
+});
+
+
+// =======================================
+// POST /api/users
+// =======================================
+
+router.post(
+    "/",
+    uploadUser.single("avatar"),
+
+    async (req, res) => {
+        try {
+            const {
+                firstname,
+                lastname,
+                username,
+                password
+            } = req.body;
+
+            if (
+                !firstname?.trim() ||
+                !lastname?.trim() ||
+                !username?.trim() ||
+                !password
+            ) {
+                await deleteUploadedFile(
+                    req.file
+                );
+
+                return res.status(400).json({
+                    error:
+                        "Firstname, lastname, username y password son obligatorios"
+                });
+            }
+
+            const users =
+                await readUsers();
+
+            const usernameExists =
+                users.some(
+                    user =>
+                        user.username.toLowerCase() ===
+                        username.trim().toLowerCase()
+                );
+
+            if (usernameExists) {
+                await deleteUploadedFile(
+                    req.file
+                );
+
+                return res.status(400).json({
+                    error:
+                        "El username ya está registrado"
+                });
+            }
+
+            const newId =
+                users.length === 0
+                    ? 1
+                    : Math.max(
+                        ...users.map(
+                            user => user.id
+                        )
+                    ) + 1;
+
+            const hashedPassword =
+                await hashPassword(
+                    password
+                );
+
+            const newUser = {
+                id: newId,
+
+                firstname:
+                    firstname.trim(),
+
+                lastname:
+                    lastname.trim(),
+
+                username:
+                    username.trim(),
+
+                password:
+                    hashedPassword,
+
+                avatar:
+                    req.file
+                        ? `/img/users/${req.file.filename}`
+                        : null
+            };
+
+            users.push(newUser);
+
+            await writeUsers(users);
+
+            res.status(201).json({
+                message:
+                    "Usuario creado correctamente",
+
+                user:
+                    hidePassword(newUser)
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            await deleteUploadedFile(
+                req.file
+            );
+
+            res.status(500).json({
+                error:
+                    "Error al crear el usuario"
+            });
+        }
+    }
+);
+
+
+// =======================================
+// PUT /api/users/:id
+// =======================================
+
+router.put(
+    "/:id",
+    uploadUser.single("avatar"),
+
+    async (req, res) => {
+        try {
+            const id =
+                Number(req.params.id);
+
+            if (
+                !Number.isInteger(id) ||
+                id <= 0
+            ) {
+                await deleteUploadedFile(
+                    req.file
+                );
+
+                return res.status(400).json({
+                    error: "ID inválido"
+                });
+            }
+
+            const users =
+                await readUsers();
+
+            const index =
+                users.findIndex(
+                    user =>
+                        user.id === id
+                );
+
+            if (index === -1) {
+                await deleteUploadedFile(
+                    req.file
+                );
+
+                return res.status(404).json({
+                    error:
+                        "Usuario no encontrado"
+                });
+            }
+
+            const currentUser =
+                users[index];
+
+            if (
+                req.body.username &&
+                req.body.username.trim()
+            ) {
+                const newUsername =
+                    req.body.username
+                        .trim();
+
+                const usernameExists =
+                    users.some(
+                        user =>
+                            user.id !== id &&
+                            user.username
+                                .toLowerCase() ===
+                            newUsername
+                                .toLowerCase()
+                    );
+
+                if (usernameExists) {
+                    await deleteUploadedFile(
+                        req.file
+                    );
+
+                    return res.status(400).json({
+                        error:
+                            "El username ya está registrado"
+                    });
+                }
+            }
+
+            let newPassword =
+                currentUser.password;
+
+            if (
+                req.body.password &&
+                req.body.password.trim()
+            ) {
+                newPassword =
+                    await hashPassword(
+                        req.body.password
+                    );
+            }
+
+            const newAvatar =
+                req.file
+                    ? `/img/users/${req.file.filename}`
+                    : currentUser.avatar;
+
+            const updatedUser = {
+                ...currentUser,
+
+                firstname:
+                    req.body.firstname?.trim() ||
+                    currentUser.firstname,
+
+                lastname:
+                    req.body.lastname?.trim() ||
+                    currentUser.lastname,
+
+                username:
+                    req.body.username?.trim() ||
+                    currentUser.username,
+
+                password:
+                    newPassword,
+
+                avatar:
+                    newAvatar
+            };
+
+            users[index] =
+                updatedUser;
+
+            await writeUsers(users);
+
+            // Eliminar avatar anterior
+            // solo después de guardar.
+            if (
+                req.file &&
+                currentUser.avatar
+            ) {
+                await deleteFileSafe(
+                    currentUser.avatar
+                );
+            }
+
+            res.status(200).json({
+                message:
+                    "Usuario actualizado correctamente",
+
+                user:
+                    hidePassword(updatedUser)
+            });
+
+        } catch (error) {
+            console.error(error);
+
+            await deleteUploadedFile(
+                req.file
+            );
+
+            res.status(500).json({
+                error:
+                    "Error al actualizar el usuario"
+            });
+        }
+    }
+);
+
+
+// =======================================
+// DELETE /api/users/:id
+// =======================================
+
+router.delete("/:id", async (req, res) => {
+    try {
+        const id =
+            Number(req.params.id);
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
+            return res.status(400).json({
+                error: "ID inválido"
+            });
+        }
+
+        const users =
+            await readUsers();
+
+        const index =
+            users.findIndex(
+                user => user.id === id
+            );
+
+        if (index === -1) {
+            return res.status(404).json({
+                error:
+                    "Usuario no encontrado"
+            });
+        }
+
+        const deletedUser =
+            users[index];
+
+        users.splice(index, 1);
+
+        await writeUsers(users);
+
+        if (deletedUser.avatar) {
+            await deleteFileSafe(
+                deletedUser.avatar
+            );
+        }
+
+        res.status(200).json({
+            message:
+                "Usuario eliminado correctamente"
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error:
+                "Error al eliminar el usuario"
+        });
+    }
+});
+
+
+export default router;

@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Pet Manager | Usuarios y Mascotas</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/styles.css"
+    >
+</head>
+
+
+<body>
+
+    <!-- ========================================= -->
+    <!-- NOTIFICACIONES -->
+    <!-- ========================================= -->
+
+    <div id="toast"></div>
+
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                🐾
+            </div>
+
+            <div>
+                <h1>Pet Manager</h1>
+
+                <p>
+                    API REST · Usuarios y Mascotas
+                </p>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ========================================= -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ========================================= -->
+
+    <main>
+
+        <section class="page-title">
+
+            <h2>
+                Panel de administración
+            </h2>
+
+            <p>
+                Gestiona los usuarios y mascotas registrados en el sistema.
+            </p>
+
+        </section>
+
+
+        <!-- ========================================= -->
+        <!-- RESUMEN -->
+        <!-- ========================================= -->
+
+        <section class="summary">
+
+            <article class="summary-card">
+
+                <div class="summary-icon">
+                    👤
+                </div>
+
+                <div>
+
+                    <strong id="userTotal">
+                        0
+                    </strong>
+
+                    <span>
+                        Usuarios registrados
+                    </span>
+
+                </div>
+
+            </article>
+
+
+            <article class="summary-card">
+
+                <div class="summary-icon">
+                    🐶
+                </div>
+
+                <div>
+
+                    <strong id="petTotal">
+                        0
+                    </strong>
+
+                    <span>
+                        Mascotas registradas
+                    </span>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ========================================= -->
+        <!-- BARRA DE NAVEGACIÓN -->
+        <!-- ========================================= -->
+
+        <section class="toolbar">
+
+            <div class="tabs">
+
+                <button
+                    id="usersTab"
+                    class="tab active"
+                    type="button"
+                >
+                    👤 Usuarios
+                </button>
+
+
+                <button
+                    id="petsTab"
+                    class="tab"
+                    type="button"
+                >
+                    🐾 Mascotas
+                </button>
+
+            </div>
+
+
+            <button
+                id="newButton"
+                class="primary-btn"
+                type="button"
+            >
+                + Nuevo usuario
+            </button>
+
+        </section>
+
+
+        <!-- ========================================= -->
+        <!-- LISTA DE USUARIOS -->
+        <!-- ========================================= -->
+
+        <section
+            id="usersGrid"
+            class="grid"
+        ></section>
+
+
+        <!-- ========================================= -->
+        <!-- LISTA DE MASCOTAS -->
+        <!-- ========================================= -->
+
+        <section
+            id="petsGrid"
+            class="grid hidden"
+        ></section>
+
+    </main>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL: INFORMACIÓN DEL USUARIO -->
+    <!-- ===================================================== -->
+
+    <div
+        id="userDetailModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <h3>
+                        Información del usuario
+                    </h3>
+                </div>
+
+
+                <button
+                    class="close-btn"
+                    type="button"
+                    data-close="userDetailModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="userDetailBody"
+                class="modal-body"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL: CREAR / EDITAR USUARIO -->
+    <!-- ===================================================== -->
+
+    <div
+        id="userFormModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3 id="userModalTitle">
+                    Nuevo usuario
+                </h3>
+
+
+                <button
+                    class="close-btn"
+                    type="button"
+                    data-close="userFormModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <form id="userForm">
+
+                    <input
+                        type="hidden"
+                        id="userId"
+                    >
+
+
+                    <div class="form-grid">
+
+
+                        <!-- NOMBRE -->
+
+                        <div class="field">
+
+                            <label for="firstname">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                id="firstname"
+                                name="firstname"
+                                placeholder="Ej: Fernando"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- APELLIDO -->
+
+                        <div class="field">
+
+                            <label for="lastname">
+                                Apellido
+                            </label>
+
+                            <input
+                                type="text"
+                                id="lastname"
+                                name="lastname"
+                                placeholder="Ej: Cuellar"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- USERNAME -->
+
+                        <div class="field full">
+
+                            <label for="username">
+                                Username
+                            </label>
+
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Ej: fernando.cuellar"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- PASSWORD -->
+
+                        <div class="field full">
+
+                            <label for="password">
+                                Contraseña
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Contraseña"
+                                required
+                            >
+
+                            <small id="passwordMessage">
+                                La contraseña es obligatoria para crear un usuario.
+                            </small>
+
+                        </div>
+
+
+                        <!-- AVATAR -->
+
+                        <div class="field full">
+
+                            <label for="avatar">
+                                Avatar
+                            </label>
+
+                            <input
+                                type="file"
+                                id="avatar"
+                                name="avatar"
+                                accept="image/*"
+                            >
+
+                            <small>
+                                Selecciona una imagen para el perfil.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="submit-row">
+
+                        <button
+                            class="cancel-btn"
+                            type="button"
+                            data-close="userFormModal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            class="primary-btn"
+                            type="submit"
+                        >
+                            Guardar usuario
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL: INFORMACIÓN DE LA MASCOTA -->
+    <!-- ===================================================== -->
+
+    <div
+        id="petDetailModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3>
+                    Información de la mascota
+                </h3>
+
+
+                <button
+                    class="close-btn"
+                    type="button"
+                    data-close="petDetailModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="petDetailBody"
+                class="modal-body"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL: CREAR / EDITAR MASCOTA -->
+    <!-- ===================================================== -->
+
+    <div
+        id="petFormModal"
+        class="modal"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <h3 id="petModalTitle">
+                    Nueva mascota
+                </h3>
+
+
+                <button
+                    class="close-btn"
+                    type="button"
+                    data-close="petFormModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <form id="petForm">
+
+                    <input
+                        type="hidden"
+                        id="petId"
+                    >
+
+
+                    <div class="form-grid">
+
+
+                        <!-- ESPECIE -->
+
+                        <div class="field">
+
+                            <label for="especie">
+                                Especie
+                            </label>
+
+                            <input
+                                type="text"
+                                id="especie"
+                                name="especie"
+                                placeholder="Ej: Perro"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- COLOR -->
+
+                        <div class="field">
+
+                            <label for="color">
+                                Color
+                            </label>
+
+                            <input
+                                type="text"
+                                id="color"
+                                name="color"
+                                placeholder="Ej: Negro con blanco"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- EDAD -->
+
+                        <div class="field">
+
+                            <label for="edad">
+                                Edad
+                            </label>
+
+                            <input
+                                type="number"
+                                id="edad"
+                                name="edad"
+                                min="0"
+                                placeholder="Ej: 4"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- SEXO -->
+
+                        <div class="field">
+
+                            <label for="sexo">
+                                Sexo
+                            </label>
+
+                            <select
+                                id="sexo"
+                                name="sexo"
+                                required
+                            >
+
+                                <option value="">
+                                    Seleccionar
+                                </option>
+
+                                <option value="macho">
+                                    Macho
+                                </option>
+
+                                <option value="hembra">
+                                    Hembra
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- IMÁGENES -->
+
+                        <div class="field full">
+
+                            <label for="petImages">
+                                Fotografías
+                            </label>
+
+                            <input
+                                type="file"
+                                id="petImages"
+                                name="img"
+                                accept="image/*"
+                                multiple
+                            >
+
+                            <small>
+                                Puedes seleccionar hasta 5 imágenes.
+                            </small>
+
+                        </div>
+
+
+                        <!-- REEMPLAZAR IMÁGENES -->
+
+                        <div
+                            id="replaceField"
+                            class="field full hidden"
+                        >
+
+                            <label>
+
+                                <input
+                                    type="checkbox"
+                                    id="replaceImages"
+                                >
+
+                                Reemplazar fotografías actuales
+
+                            </label>
+
+                            <small>
+                                Si no marcas esta opción, las nuevas imágenes se agregarán a las existentes.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="submit-row">
+
+                        <button
+                            class="cancel-btn"
+                            type="button"
+                            data-close="petFormModal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            class="primary-btn"
+                            type="submit"
+                        >
+                            Guardar mascota
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ===================================================== -->
+
+    <script>
+
+        // =========================================
+        // REFERENCIAS
+        // =========================================
+
+        const usersTab =
+            document.getElementById("usersTab");
+
+        const petsTab =
+            document.getElementById("petsTab");
+
+        const usersGrid =
+            document.getElementById("usersGrid");
+
+        const petsGrid =
+            document.getElementById("petsGrid");
+
+        const newButton =
+            document.getElementById("newButton");
+
+        const userTotal =
+            document.getElementById("userTotal");
+
+        const petTotal =
+            document.getElementById("petTotal");
+
+
+        const userDetailBody =
+            document.getElementById("userDetailBody");
+
+        const petDetailBody =
+            document.getElementById("petDetailBody");
+
+
+        const userForm =
+            document.getElementById("userForm");
+
+        const petForm =
+            document.getElementById("petForm");
+
+
+        const userIdInput =
+            document.getElementById("userId");
+
+        const petIdInput =
+            document.getElementById("petId");
+
+
+        const firstnameInput =
+            document.getElementById("firstname");
+
+        const lastnameInput =
+            document.getElementById("lastname");
+
+        const usernameInput =
+            document.getElementById("username");
+
+        const passwordInput =
+            document.getElementById("password");
+
+
+        const especieInput =
+            document.getElementById("especie");
+
+        const colorInput =
+            document.getElementById("color");
+
+        const edadInput =
+            document.getElementById("edad");
+
+        const sexoInput =
+            document.getElementById("sexo");
+
+        const petImagesInput =
+            document.getElementById("petImages");
+
+
+        const replaceField =
+            document.getElementById("replaceField");
+
+        const replaceImagesInput =
+            document.getElementById("replaceImages");
+
+
+        const userModalTitle =
+            document.getElementById("userModalTitle");
+
+        const petModalTitle =
+            document.getElementById("petModalTitle");
+
+        const passwordMessage =
+            document.getElementById("passwordMessage");
+
+
+        let currentView = "users";
+
+
+        // =========================================
+        // MODALES
+        // =========================================
+
+        function openModal(id) {
+
+            document
+                .getElementById(id)
+                .classList.add("show");
+        }
+
+
+        function closeModal(id) {
+
+            document
+                .getElementById(id)
+                .classList.remove("show");
+        }
+
+
+        document
+            .querySelectorAll("[data-close]")
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        closeModal(
+                            button.dataset.close
+                        );
+                    }
+                );
+            });
+
+
+        // Cerrar tocando el fondo
+
+        document
+            .querySelectorAll(".modal")
+            .forEach(modal => {
+
+                modal.addEventListener(
+                    "click",
+                    event => {
+
+                        if (
+                            event.target === modal
+                        ) {
+                            closeModal(
+                                modal.id
+                            );
+                        }
+                    }
+                );
+            });
+
+
+        // ESC para cerrar modales
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    document
+                        .querySelectorAll(
+                            ".modal.show"
+                        )
+                        .forEach(
+                            modal =>
+                                closeModal(
+                                    modal.id
+                                )
+                        );
+                }
+            }
+        );
+
+
+        // =========================================
+        // NOTIFICACIONES
+        // =========================================
+
+        function showToast(
+            message,
+            type = "success"
+        ) {
+
+            const toast =
+                document.getElementById(
+                    "toast"
+                );
+
+            toast.textContent =
+                message;
+
+            toast.className =
+                type;
+
+
+            setTimeout(
+                () => {
+
+                    toast.className = "";
+
+                },
+                3000
+            );
+        }
+
+
+        // =========================================
+        // CAMBIAR ENTRE USUARIOS / MASCOTAS
+        // =========================================
+
+        function showUsersSection() {
+
+            currentView =
+                "users";
+
+
+            usersGrid.classList.remove(
+                "hidden"
+            );
+
+            petsGrid.classList.add(
+                "hidden"
+            );
+
+
+            usersTab.classList.add(
+                "active"
+            );
+
+            petsTab.classList.remove(
+                "active"
+            );
+
+
+            newButton.textContent =
+                "+ Nuevo usuario";
+
+            newButton.onclick =
+                openNewUser;
+
+
+            loadUsers();
+        }
+
+
+        function showPetsSection() {
+
+            currentView =
+                "pets";
+
+
+            petsGrid.classList.remove(
+                "hidden"
+            );
+
+            usersGrid.classList.add(
+                "hidden"
+            );
+
+
+            petsTab.classList.add(
+                "active"
+            );
+
+            usersTab.classList.remove(
+                "active"
+            );
+
+
+            newButton.textContent =
+                "+ Nueva mascota";
+
+            newButton.onclick =
+                openNewPet;
+
+
+            loadPets();
+        }
+
+
+        usersTab.addEventListener(
+            "click",
+            showUsersSection
+        );
+
+
+        petsTab.addEventListener(
+            "click",
+            showPetsSection
+        );
+
+
+        // =========================================
+        // CARGAR TOTALES
+        // =========================================
+
+        async function loadTotals() {
+
+            try {
+
+                const [
+                    usersResponse,
+                    petsResponse
+                ] = await Promise.all([
+
+                    fetch("/api/users"),
+
+                    fetch("/api/pets")
+
+                ]);
+
+
+                const users =
+                    await usersResponse.json();
+
+                const pets =
+                    await petsResponse.json();
+
+
+                userTotal.textContent =
+                    Array.isArray(users)
+                        ? users.length
+                        : 0;
+
+
+                petTotal.textContent =
+                    Array.isArray(pets)
+                        ? pets.length
+                        : 0;
+
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        }
+
+
+        // =========================================
+        // USUARIOS - GET TODOS
+        // =========================================
+
+        async function loadUsers() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/users"
+                    );
+
+
+                const users =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        users.error ||
+                        "Error al consultar usuarios",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                usersGrid.innerHTML =
+                    "";
+
+
+                if (
+                    users.length === 0
+                ) {
+
+                    usersGrid.innerHTML = `
+
+                        <div class="empty">
+
+                            <h3>
+                                No hay usuarios registrados
+                            </h3>
+
+                            <p>
+                                Crea el primer usuario para comenzar.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                users.forEach(
+                    (user, index) => {
+
+                        const card =
+                            document.createElement(
+                                "article"
+                            );
+
+
+                        card.className =
+                            "entity-card";
+
+
+                        card.style.animationDelay =
+                            `${index * 70}ms`;
+
+
+                        card.addEventListener(
+                            "click",
+                            () =>
+                                showUserDetails(
+                                    user.id
+                                )
+                        );
+
+
+                        const avatar =
+                            user.avatar
+                                ? `
+                                    <img
+                                        src="${user.avatar}"
+                                        class="mini-avatar"
+                                        alt="${user.firstname}"
+                                    >
+                                  `
+                                : `
+                                    <div
+                                        class="mini-avatar"
+                                        style="
+                                            display:grid;
+                                            place-items:center;
+                                            font-size:28px;
+                                        "
+                                    >
+                                        👤
+                                    </div>
+                                  `;
+
+
+                        card.innerHTML = `
+
+                            <div class="user-card-top">
+
+                                ${avatar}
+
+
+                                <div class="user-card-info">
+
+                                    <h3>
+                                        ${user.firstname}
+                                        ${user.lastname}
+                                    </h3>
+
+                                    <p>
+                                        @${user.username}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="card-footer">
+
+                                <span>
+                                    Ver perfil
+                                </span>
+
+                                <span>
+                                    ID ${user.id}
+                                </span>
+
+                            </div>
+
+                        `;
+
+
+                        usersGrid.appendChild(
+                            card
+                        );
+                    }
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "No fue posible cargar los usuarios",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // USUARIO - DETALLE
+        // =========================================
+
+        async function showUserDetails(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/users/${id}`
+                    );
+
+
+                const user =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        user.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const avatar =
+                    user.avatar
+                        ? `
+                            <a
+                                href="${user.avatar}"
+                                target="_blank"
+                            >
+                                <img
+                                    src="${user.avatar}"
+                                    class="profile-avatar"
+                                    alt="${user.firstname}"
+                                >
+                            </a>
+                          `
+                        : `
+                            <div
+                                class="profile-avatar"
+                                style="
+                                    margin-left:auto;
+                                    margin-right:auto;
+                                    display:grid;
+                                    place-items:center;
+                                    background:#eef2ff;
+                                    font-size:55px;
+                                "
+                            >
+                                👤
+                            </div>
+                          `;
+
+
+                userDetailBody.innerHTML = `
+
+                    <div class="profile-head">
+
+                        ${avatar}
+
+                        <h2>
+                            ${user.firstname}
+                            ${user.lastname}
+                        </h2>
+
+                        <p>
+                            @${user.username}
+                        </p>
+
+                    </div>
+
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+
+                            <small>
+                                ID
+                            </small>
+
+                            <strong>
+                                ${user.id}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Username
+                            </small>
+
+                            <strong>
+                                ${user.username}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Nombre
+                            </small>
+
+                            <strong>
+                                ${user.firstname}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Apellido
+                            </small>
+
+                            <strong>
+                                ${user.lastname}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button
+                            class="edit-btn"
+                            type="button"
+                            onclick="
+                                closeModal('userDetailModal');
+                                openEditUser(${user.id});
+                            "
+                        >
+                            ✏️ Editar usuario
+                        </button>
+
+
+                        <button
+                            class="delete-btn"
+                            type="button"
+                            onclick="
+                                deleteUser(${user.id})
+                            "
+                        >
+                            🗑️ Eliminar usuario
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                openModal(
+                    "userDetailModal"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al consultar el usuario",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // USUARIO - NUEVO
+        // =========================================
+
+        function openNewUser() {
+
+            userForm.reset();
+
+            userIdInput.value =
+                "";
+
+
+            passwordInput.required =
+                true;
+
+
+            passwordMessage.textContent =
+                "La contraseña es obligatoria para crear un usuario.";
+
+
+            userModalTitle.textContent =
+                "Nuevo usuario";
+
+
+            openModal(
+                "userFormModal"
+            );
+        }
+
+
+        // =========================================
+        // USUARIO - EDITAR
+        // =========================================
+
+        async function openEditUser(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/users/${id}`
+                    );
+
+
+                const user =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        user.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                userForm.reset();
+
+
+                userIdInput.value =
+                    user.id;
+
+
+                firstnameInput.value =
+                    user.firstname;
+
+
+                lastnameInput.value =
+                    user.lastname;
+
+
+                usernameInput.value =
+                    user.username;
+
+
+                passwordInput.value =
+                    "";
+
+
+                passwordInput.required =
+                    false;
+
+
+                passwordMessage.textContent =
+                    "Déjala vacía si no deseas cambiar la contraseña.";
+
+
+                userModalTitle.textContent =
+                    "Editar usuario";
+
+
+                openModal(
+                    "userFormModal"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al cargar el usuario",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // USUARIO - POST / PUT
+        // =========================================
+
+        userForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+
+                const id =
+                    userIdInput.value;
+
+
+                const formData =
+                    new FormData(
+                        userForm
+                    );
+
+
+                if (
+                    id &&
+                    !passwordInput.value
+                ) {
+
+                    formData.delete(
+                        "password"
+                    );
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+
+                            id
+                                ? `/api/users/${id}`
+                                : "/api/users",
+
+                            {
+                                method:
+                                    id
+                                        ? "PUT"
+                                        : "POST",
+
+                                body:
+                                    formData
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        showToast(
+                            data.error ||
+                            "Error al guardar usuario",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    closeModal(
+                        "userFormModal"
+                    );
+
+
+                    showToast(
+                        data.message
+                    );
+
+
+                    await loadUsers();
+
+                    await loadTotals();
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    showToast(
+                        "Error al conectar con el servidor",
+                        "error"
+                    );
+                }
+            }
+        );
+
+
+        // =========================================
+        // USUARIO - DELETE
+        // =========================================
+
+        async function deleteUser(id) {
+
+            const confirmation =
+                confirm(
+                    "¿Deseas eliminar definitivamente este usuario?"
+                );
+
+
+            if (!confirmation) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/users/${id}`,
+                        {
+                            method:
+                                "DELETE"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        data.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                closeModal(
+                    "userDetailModal"
+                );
+
+
+                showToast(
+                    data.message
+                );
+
+
+                await loadUsers();
+
+                await loadTotals();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al eliminar usuario",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // MASCOTAS - GET TODAS
+        // =========================================
+
+        async function loadPets() {
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/pets"
+                    );
+
+
+                const pets =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        pets.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                petsGrid.innerHTML =
+                    "";
+
+
+                if (
+                    pets.length === 0
+                ) {
+
+                    petsGrid.innerHTML = `
+
+                        <div class="empty">
+
+                            <h3>
+                                No hay mascotas registradas
+                            </h3>
+
+                            <p>
+                                Crea la primera mascota para comenzar.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                pets.forEach(
+                    (pet, index) => {
+
+                        const card =
+                            document.createElement(
+                                "article"
+                            );
+
+
+                        card.className =
+                            "entity-card";
+
+
+                        card.style.animationDelay =
+                            `${index * 70}ms`;
+
+
+                        card.addEventListener(
+                            "click",
+                            () =>
+                                showPetDetails(
+                                    pet.id
+                                )
+                        );
+
+
+                        const firstImage =
+                            Array.isArray(
+                                pet.img
+                            ) &&
+                            pet.img.length > 0
+
+                                ? pet.img[0]
+                                : null;
+
+
+                        const image =
+                            firstImage
+                                ? `
+                                    <img
+                                        src="${firstImage}"
+                                        class="pet-cover"
+                                        alt="${pet.especie}"
+                                    >
+                                  `
+                                : `
+                                    <div
+                                        class="pet-cover"
+                                        style="
+                                            display:grid;
+                                            place-items:center;
+                                            font-size:60px;
+                                        "
+                                    >
+                                        🐾
+                                    </div>
+                                  `;
+
+
+                        card.innerHTML = `
+
+                            ${image}
+
+
+                            <h3>
+                                ${pet.especie}
+                            </h3>
+
+
+                            <p>
+                                ${pet.color}
+                            </p>
+
+
+                            <div class="card-footer">
+
+                                <span>
+                                    ${pet.edad} año(s)
+                                </span>
+
+                                <span>
+                                    ID ${pet.id}
+                                </span>
+
+                            </div>
+
+                        `;
+
+
+                        petsGrid.appendChild(
+                            card
+                        );
+                    }
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "No fue posible cargar las mascotas",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // MASCOTA - DETALLE
+        // =========================================
+
+        async function showPetDetails(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/pets/${id}`
+                    );
+
+
+                const pet =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        pet.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                let gallery;
+
+
+                if (
+                    Array.isArray(
+                        pet.img
+                    ) &&
+                    pet.img.length > 0
+                ) {
+
+                    gallery = `
+
+                        <div class="gallery">
+
+                            ${pet.img.map(
+                                image => `
+
+                                    <a
+                                        href="${image}"
+                                        target="_blank"
+                                    >
+
+                                        <img
+                                            src="${image}"
+                                            alt="${pet.especie}"
+                                        >
+
+                                    </a>
+
+                                `
+                            ).join("")}
+
+                        </div>
+
+                    `;
+
+                } else {
+
+                    gallery = `
+
+                        <div class="empty">
+
+                            <p>
+                                Esta mascota no tiene fotografías.
+                            </p>
+
+                        </div>
+
+                    `;
+                }
+
+
+                petDetailBody.innerHTML = `
+
+                    ${gallery}
+
+
+                    <div class="profile-head">
+
+                        <h2>
+                            ${pet.especie}
+                        </h2>
+
+                        <p>
+                            ${pet.color}
+                        </p>
+
+                    </div>
+
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+
+                            <small>
+                                ID
+                            </small>
+
+                            <strong>
+                                ${pet.id}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Especie
+                            </small>
+
+                            <strong>
+                                ${pet.especie}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Color
+                            </small>
+
+                            <strong>
+                                ${pet.color}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Edad
+                            </small>
+
+                            <strong>
+                                ${pet.edad}
+                                año(s)
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Sexo
+                            </small>
+
+                            <strong>
+                                ${pet.sexo}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <small>
+                                Fotografías
+                            </small>
+
+                            <strong>
+                                ${
+                                    Array.isArray(
+                                        pet.img
+                                    )
+                                        ? pet.img.length
+                                        : 0
+                                }
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button
+                            class="edit-btn"
+                            type="button"
+                            onclick="
+                                closeModal('petDetailModal');
+                                openEditPet(${pet.id});
+                            "
+                        >
+                            ✏️ Editar mascota
+                        </button>
+
+
+                        <button
+                            class="delete-btn"
+                            type="button"
+                            onclick="
+                                deletePet(${pet.id})
+                            "
+                        >
+                            🗑️ Eliminar mascota
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                openModal(
+                    "petDetailModal"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al consultar mascota",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // MASCOTA - NUEVA
+        // =========================================
+
+        function openNewPet() {
+
+            petForm.reset();
+
+
+            petIdInput.value =
+                "";
+
+
+            petModalTitle.textContent =
+                "Nueva mascota";
+
+
+            replaceField.classList.add(
+                "hidden"
+            );
+
+
+            replaceImagesInput.checked =
+                false;
+
+
+            openModal(
+                "petFormModal"
+            );
+        }
+
+
+        // =========================================
+        // MASCOTA - EDITAR
+        // =========================================
+
+        async function openEditPet(id) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/pets/${id}`
+                    );
+
+
+                const pet =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        pet.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                petForm.reset();
+
+
+                petIdInput.value =
+                    pet.id;
+
+
+                especieInput.value =
+                    pet.especie;
+
+
+                colorInput.value =
+                    pet.color;
+
+
+                edadInput.value =
+                    pet.edad;
+
+
+                sexoInput.value =
+                    pet.sexo;
+
+
+                replaceImagesInput.checked =
+                    false;
+
+
+                replaceField.classList.remove(
+                    "hidden"
+                );
+
+
+                petModalTitle.textContent =
+                    "Editar mascota";
+
+
+                openModal(
+                    "petFormModal"
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al cargar mascota",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // MASCOTA - POST / PUT
+        // =========================================
+
+        petForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+
+                const id =
+                    petIdInput.value;
+
+
+                const files =
+                    petImagesInput.files;
+
+
+                if (
+                    files.length > 5
+                ) {
+
+                    showToast(
+                        "Solo puedes seleccionar hasta 5 imágenes",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                const formData =
+                    new FormData(
+                        petForm
+                    );
+
+
+                if (id) {
+
+                    formData.set(
+                        "replaceImages",
+
+                        replaceImagesInput.checked
+                            ? "true"
+                            : "false"
+                    );
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+
+                            id
+                                ? `/api/pets/${id}`
+                                : "/api/pets",
+
+                            {
+                                method:
+                                    id
+                                        ? "PUT"
+                                        : "POST",
+
+                                body:
+                                    formData
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        showToast(
+                            data.error ||
+                            "Error al guardar mascota",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    closeModal(
+                        "petFormModal"
+                    );
+
+
+                    showToast(
+                        data.message
+                    );
+
+
+                    await loadPets();
+
+                    await loadTotals();
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    showToast(
+                        "Error al conectar con el servidor",
+                        "error"
+                    );
+                }
+            }
+        );
+
+
+        // =========================================
+        // MASCOTA - DELETE
+        // =========================================
+
+        async function deletePet(id) {
+
+            const confirmation =
+                confirm(
+                    "¿Deseas eliminar definitivamente esta mascota?"
+                );
+
+
+            if (!confirmation) {
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/pets/${id}`,
+                        {
+                            method:
+                                "DELETE"
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    showToast(
+                        data.error,
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+                closeModal(
+                    "petDetailModal"
+                );
+
+
+                showToast(
+                    data.message
+                );
+
+
+                await loadPets();
+
+                await loadTotals();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showToast(
+                    "Error al eliminar mascota",
+                    "error"
+                );
+            }
+        }
+
+
+        // =========================================
+        // INICIO
+        // =========================================
+
+        newButton.onclick =
+            openNewUser;
+
+
+        loadUsers();
+
+        loadTotals();
+
+    </script>
+
+</body>
+
+</html>

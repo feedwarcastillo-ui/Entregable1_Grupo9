@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "especie": "perro",
+    "color": "negro con blanco",
+    "edad": 4,
+    "sexo": "macho",
+    "img": [
+      "/img/pets/pet-1793200603248-ecaf97c23f3f.jpg",
+      "/img/pets/pet-1793200603249-d9f3434956ae.jpg"
+    ]
+  },
+  {
+    "id": 2,
+    "especie": "Gato",
+    "color": "Amarillo",
+    "edad": 2,
+    "sexo": "hembra",
+    "img": [
+      "/img/pets/pet-1793201480593-5314e0d38244.avif",
+      "/img/pets/pet-1793201480594-c7f03ace484b.jpg"
+    ]
+  }
+]
