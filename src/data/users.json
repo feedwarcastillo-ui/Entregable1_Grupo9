@@ -1,6 +1,6 @@
 [
   {
-    "id": 2,
+    "id": 1,
     "firstname": "Fernandito",
     "lastname": "Cuellar",
     "username": "Cuellar@gmail.com",
@@ -8,7 +8,7 @@
     "avatar": "/img/users/avatar-1793156134076-38248aaf33d8.png"
   },
   {
-    "id": 3,
+    "id": 2,
     "firstname": "Felipe",
     "lastname": "Cuellar",
     "username": "Felipe@gmail.com",
@@ -16,7 +16,7 @@
     "avatar": "/img/users/avatar-1793200070411-96cffa395f88.jpg"
   },
   {
-    "id": 4,
+    "id": 3,
     "firstname": "Yuliet",
     "lastname": "Rojas",
     "username": "Rojas@gmail.com",
@@ -24,7 +24,7 @@
     "avatar": "/img/users/avatar-1793200119913-f225bbd62b6d.webp"
   },
   {
-    "id": 5,
+    "id": 4,
     "firstname": "Andres",
     "lastname": "Ramiirez",
     "username": "Ander@gmail.com",

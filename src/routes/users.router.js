@@ -18,12 +18,15 @@ const __filename =
 const __dirname =
     path.dirname(__filename);
 
-const router = express.Router();
+const router =
+    express.Router();
 
-const usersFile = path.join(
-    __dirname,
-    "../data/users.json"
-);
+
+const usersFile =
+    path.join(
+        __dirname,
+        "../data/users.json"
+    );
 
 
 // =======================================
@@ -31,10 +34,12 @@ const usersFile = path.join(
 // =======================================
 
 async function readUsers() {
-    const data = await fs.readFile(
-        usersFile,
-        "utf8"
-    );
+
+    const data =
+        await fs.readFile(
+            usersFile,
+            "utf8"
+        );
 
     if (!data.trim()) {
         return [];
@@ -45,15 +50,21 @@ async function readUsers() {
 
 
 async function writeUsers(users) {
+
     await fs.writeFile(
         usersFile,
-        JSON.stringify(users, null, 2),
+        JSON.stringify(
+            users,
+            null,
+            2
+        ),
         "utf8"
     );
 }
 
 
 function hidePassword(user) {
+
     const {
         password,
         ...safeUser
@@ -64,22 +75,34 @@ function hidePassword(user) {
 
 
 function getPublicFilePath(fileUrl) {
+
     return path.join(
         __dirname,
         "../../public",
-        fileUrl.replace(/^\/+/, "")
+        fileUrl.replace(
+            /^\/+/,
+            ""
+        )
     );
 }
 
 
 async function deleteFileSafe(fileUrl) {
-    if (!fileUrl) return;
+
+    if (!fileUrl) {
+        return;
+    }
 
     try {
+
         await fs.unlink(
-            getPublicFilePath(fileUrl)
+            getPublicFilePath(
+                fileUrl
+            )
         );
+
     } catch (error) {
+
         console.log(
             `No se pudo eliminar: ${fileUrl}`
         );
@@ -88,11 +111,19 @@ async function deleteFileSafe(fileUrl) {
 
 
 async function deleteUploadedFile(file) {
-    if (!file) return;
+
+    if (!file) {
+        return;
+    }
 
     try {
-        await fs.unlink(file.path);
+
+        await fs.unlink(
+            file.path
+        );
+
     } catch (error) {
+
         console.log(
             "No se pudo eliminar el archivo temporal"
         );
@@ -104,74 +135,111 @@ async function deleteUploadedFile(file) {
 // GET /api/users
 // =======================================
 
-router.get("/", async (req, res) => {
-    try {
-        const users =
-            await readUsers();
+router.get(
+    "/",
+    async (req, res) => {
 
-        const safeUsers =
-            users.map(hidePassword);
+        try {
 
-        res.status(200).json(
-            safeUsers
-        );
+            const users =
+                await readUsers();
 
-    } catch (error) {
-        console.error(error);
+            const safeUsers =
+                users.map(
+                    hidePassword
+                );
 
-        res.status(500).json({
-            error:
-                "Error al leer los usuarios"
-        });
+            res
+                .status(200)
+                .json(safeUsers);
+
+        } catch (error) {
+
+            console.error(error);
+
+            res
+                .status(500)
+                .json({
+                    error:
+                        "Error al leer los usuarios"
+                });
+        }
     }
-});
+);
 
 
 // =======================================
 // GET /api/users/:id
 // =======================================
 
-router.get("/:id", async (req, res) => {
-    try {
-        const id =
-            Number(req.params.id);
+router.get(
+    "/:id",
+    async (req, res) => {
 
-        if (
-            !Number.isInteger(id) ||
-            id <= 0
-        ) {
-            return res.status(400).json({
-                error: "ID inválido"
-            });
+        try {
+
+            const id =
+                Number(
+                    req.params.id
+                );
+
+            if (
+                !Number.isInteger(id) ||
+                id <= 0
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "ID inválido"
+                    });
+            }
+
+
+            const users =
+                await readUsers();
+
+
+            const user =
+                users.find(
+                    user =>
+                        user.id === id
+                );
+
+
+            if (!user) {
+
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Usuario no encontrado"
+                    });
+            }
+
+
+            res
+                .status(200)
+                .json(
+                    hidePassword(
+                        user
+                    )
+                );
+
+        } catch (error) {
+
+            console.error(error);
+
+            res
+                .status(500)
+                .json({
+                    error:
+                        "Error al consultar el usuario"
+                });
         }
-
-        const users =
-            await readUsers();
-
-        const user = users.find(
-            user => user.id === id
-        );
-
-        if (!user) {
-            return res.status(404).json({
-                error:
-                    "Usuario no encontrado"
-            });
-        }
-
-        res.status(200).json(
-            hidePassword(user)
-        );
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            error:
-                "Error al consultar el usuario"
-        });
     }
-});
+);
 
 
 // =======================================
@@ -180,16 +248,22 @@ router.get("/:id", async (req, res) => {
 
 router.post(
     "/",
-    uploadUser.single("avatar"),
+
+    uploadUser.single(
+        "avatar"
+    ),
 
     async (req, res) => {
+
         try {
+
             const {
                 firstname,
                 lastname,
                 username,
                 password
-            } = req.body;
+            } = req.body ?? {};
+
 
             if (
                 !firstname?.trim() ||
@@ -197,53 +271,71 @@ router.post(
                 !username?.trim() ||
                 !password
             ) {
+
                 await deleteUploadedFile(
                     req.file
                 );
 
-                return res.status(400).json({
-                    error:
-                        "Firstname, lastname, username y password son obligatorios"
-                });
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Firstname, lastname, username y password son obligatorios"
+                    });
             }
+
 
             const users =
                 await readUsers();
 
+
             const usernameExists =
                 users.some(
                     user =>
-                        user.username.toLowerCase() ===
-                        username.trim().toLowerCase()
+                        user.username
+                            .toLowerCase() ===
+                        username
+                            .trim()
+                            .toLowerCase()
                 );
 
+
             if (usernameExists) {
+
                 await deleteUploadedFile(
                     req.file
                 );
 
-                return res.status(400).json({
-                    error:
-                        "El username ya está registrado"
-                });
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "El username ya está registrado"
+                    });
             }
+
 
             const newId =
                 users.length === 0
                     ? 1
                     : Math.max(
                         ...users.map(
-                            user => user.id
+                            user =>
+                                user.id
                         )
                     ) + 1;
+
 
             const hashedPassword =
                 await hashPassword(
                     password
                 );
 
+
             const newUser = {
-                id: newId,
+
+                id:
+                    newId,
 
                 firstname:
                     firstname.trim(),
@@ -263,29 +355,44 @@ router.post(
                         : null
             };
 
-            users.push(newUser);
 
-            await writeUsers(users);
+            users.push(
+                newUser
+            );
 
-            res.status(201).json({
-                message:
-                    "Usuario creado correctamente",
 
-                user:
-                    hidePassword(newUser)
-            });
+            await writeUsers(
+                users
+            );
+
+
+            res
+                .status(201)
+                .json({
+
+                    message:
+                        "Usuario creado correctamente",
+
+                    user:
+                        hidePassword(
+                            newUser
+                        )
+                });
 
         } catch (error) {
+
             console.error(error);
 
             await deleteUploadedFile(
                 req.file
             );
 
-            res.status(500).json({
-                error:
-                    "Error al crear el usuario"
-            });
+            res
+                .status(500)
+                .json({
+                    error:
+                        "Error al crear el usuario"
+                });
         }
     }
 );
@@ -297,28 +404,42 @@ router.post(
 
 router.put(
     "/:id",
+
     uploadUser.single("avatar"),
 
     async (req, res) => {
+
         try {
+
+            const body =
+                req.body ?? {};
+
             const id =
                 Number(req.params.id);
 
+
+            // Validar ID
             if (
                 !Number.isInteger(id) ||
                 id <= 0
             ) {
+
                 await deleteUploadedFile(
                     req.file
                 );
 
-                return res.status(400).json({
-                    error: "ID inválido"
-                });
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "ID inválido"
+                    });
             }
+
 
             const users =
                 await readUsers();
+
 
             const index =
                 users.findIndex(
@@ -326,27 +447,56 @@ router.put(
                         user.id === id
                 );
 
+
+            // Usuario no existe
             if (index === -1) {
+
                 await deleteUploadedFile(
                     req.file
                 );
 
-                return res.status(404).json({
-                    error:
-                        "Usuario no encontrado"
-                });
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Usuario no encontrado"
+                    });
             }
+
 
             const currentUser =
                 users[index];
 
+
+            // Validar que realmente llegue algo para actualizar
+            const hasData =
+                body.firstname?.trim() ||
+                body.lastname?.trim() ||
+                body.username?.trim() ||
+                body.password?.trim() ||
+                req.file;
+
+
+            if (!hasData) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Debes enviar al menos un campo para actualizar"
+                    });
+            }
+
+
+            // Validar username duplicado
             if (
-                req.body.username &&
-                req.body.username.trim()
+                body.username &&
+                body.username.trim()
             ) {
+
                 const newUsername =
-                    req.body.username
-                        .trim();
+                    body.username.trim();
+
 
                 const usernameExists =
                     users.some(
@@ -358,49 +508,62 @@ router.put(
                                 .toLowerCase()
                     );
 
+
                 if (usernameExists) {
+
                     await deleteUploadedFile(
                         req.file
                     );
 
-                    return res.status(400).json({
-                        error:
-                            "El username ya está registrado"
-                    });
+                    return res
+                        .status(400)
+                        .json({
+                            error:
+                                "El username ya está registrado"
+                        });
                 }
             }
 
+
+            // Contraseña
             let newPassword =
                 currentUser.password;
 
+
             if (
-                req.body.password &&
-                req.body.password.trim()
+                body.password &&
+                body.password.trim()
             ) {
+
                 newPassword =
                     await hashPassword(
-                        req.body.password
+                        body.password
                     );
             }
 
+
+            // Avatar
             const newAvatar =
                 req.file
                     ? `/img/users/${req.file.filename}`
                     : currentUser.avatar;
 
+
+            // Usuario actualizado
             const updatedUser = {
+
                 ...currentUser,
 
                 firstname:
-                    req.body.firstname?.trim() ||
+                    body.firstname?.trim() ||
                     currentUser.firstname,
 
                 lastname:
-                    req.body.lastname?.trim() ||
+                    body.lastname?.trim() ||
                     currentUser.lastname,
 
                 username:
-                    req.body.username?.trim() ||
+                    body.username?.trim() ||
                     currentUser.username,
 
                 password:
@@ -410,106 +573,158 @@ router.put(
                     newAvatar
             };
 
+
             users[index] =
                 updatedUser;
 
-            await writeUsers(users);
+
+            await writeUsers(
+                users
+            );
+
 
             // Eliminar avatar anterior
-            // solo después de guardar.
             if (
                 req.file &&
                 currentUser.avatar
             ) {
+
                 await deleteFileSafe(
                     currentUser.avatar
                 );
             }
 
-            res.status(200).json({
-                message:
-                    "Usuario actualizado correctamente",
 
-                user:
-                    hidePassword(updatedUser)
-            });
+            return res
+                .status(200)
+                .json({
+
+                    message:
+                        "Usuario actualizado correctamente",
+
+                    user:
+                        hidePassword(
+                            updatedUser
+                        )
+                });
 
         } catch (error) {
+
             console.error(error);
+
 
             await deleteUploadedFile(
                 req.file
             );
 
-            res.status(500).json({
-                error:
-                    "Error al actualizar el usuario"
-            });
+
+            return res
+                .status(500)
+                .json({
+                    error:
+                        "Error al actualizar el usuario"
+                });
         }
     }
 );
-
 
 // =======================================
 // DELETE /api/users/:id
 // =======================================
 
-router.delete("/:id", async (req, res) => {
-    try {
-        const id =
-            Number(req.params.id);
+router.delete(
+    "/:id",
+    async (req, res) => {
 
-        if (
-            !Number.isInteger(id) ||
-            id <= 0
-        ) {
-            return res.status(400).json({
-                error: "ID inválido"
-            });
-        }
+        try {
 
-        const users =
-            await readUsers();
+            const id =
+                Number(
+                    req.params.id
+                );
 
-        const index =
-            users.findIndex(
-                user => user.id === id
+
+            if (
+                !Number.isInteger(id) ||
+                id <= 0
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "ID inválido"
+                    });
+            }
+
+
+            const users =
+                await readUsers();
+
+
+            const index =
+                users.findIndex(
+                    user =>
+                        user.id === id
+                );
+
+
+            if (index === -1) {
+
+                return res
+                    .status(404)
+                    .json({
+                        error:
+                            "Usuario no encontrado"
+                    });
+            }
+
+
+            const deletedUser =
+                users[index];
+
+
+            users.splice(
+                index,
+                1
             );
 
-        if (index === -1) {
-            return res.status(404).json({
-                error:
-                    "Usuario no encontrado"
-            });
-        }
 
-        const deletedUser =
-            users[index];
+            await writeUsers(
+                users
+            );
 
-        users.splice(index, 1);
 
-        await writeUsers(users);
-
-        if (deletedUser.avatar) {
-            await deleteFileSafe(
+            if (
                 deletedUser.avatar
-            );
+            ) {
+
+                await deleteFileSafe(
+                    deletedUser.avatar
+                );
+            }
+
+
+            res
+                .status(200)
+                .json({
+                    message:
+                        "Usuario eliminado correctamente"
+                });
+
+        } catch (error) {
+
+            console.error(error);
+
+            res
+                .status(500)
+                .json({
+                    error:
+                        "Error al eliminar el usuario"
+                });
         }
-
-        res.status(200).json({
-            message:
-                "Usuario eliminado correctamente"
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            error:
-                "Error al eliminar el usuario"
-        });
     }
-});
+);
 
 
 export default router;
